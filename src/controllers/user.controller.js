@@ -84,6 +84,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // 3) If everything ok, send token to client
     const token = await user.generateAccessToken();
     user["password"] = undefined;
+    user["accessToken"] = token;
 
     res.cookie('jwt', token, {
         expires: new Date(
@@ -99,7 +100,49 @@ const loginUser = asyncHandler(async (req, res) => {
 
 })
 
+const getUser = asyncHandler( async (req, res) => {
+    const user = await User.find().select("-password");
+
+    if(!user){
+        throw new ApiError(404,"User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User found successfully")
+    )
+})
+
+const getUserById = asyncHandler( async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findById(id).select("-password");
+
+    if(!user){
+        throw new ApiError(404,"User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User found successfully")
+    )
+})
+
+
+const getUserCount = asyncHandler( async(req, res) => {
+    const userCount = await User.countDocuments({});
+
+    if(!userCount){
+        throw new ApiError(404, "User count not found");
+    }
+
+    return res.status(201).json(
+        new ApiResponse(200, userCount, "User count find successfully")
+    )
+
+})
+
 export {
     registerUser,
-    loginUser
+    loginUser,
+    getUser,
+    getUserById,
+    getUserCount
 }

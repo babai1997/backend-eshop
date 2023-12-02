@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, registerUser } from "../controllers/user.controller.js";
+import { loginUser, registerUser, getUser, getUserById, getUserCount } from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 
 
@@ -12,6 +12,18 @@ router.route("/register").post(
 
     router.route("/login").post(
         loginUser
+    )
+
+    router.route('/').get(
+        getUser
+    )
+
+    router.route('/:id').get(
+        getUserById
+    )
+
+    router.route('/get/count').get(
+        getUserCount
     )
 
 export default router
