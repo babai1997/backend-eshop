@@ -17,7 +17,7 @@ const registerUser = asyncHandler( async (req, res) => {
 
 
     const {name, email, password } = req.body
-    
+
     // [name, email, password].some((field) => field.trim() === "")
 
     if ( !name || !email || !password) {
@@ -151,10 +151,63 @@ const getUserCount = asyncHandler( async(req, res) => {
 
 })
 
+const updateUser = asyncHandler(async(req, res)=> {
+    const userExist = await User.find({_id:req.params.id});
+    let newPassword;
+    // if(req.body.password){
+    //     newPassword = bcrypt.hashSync(req.body.password, 10);
+    // }else{
+    //     newPassword = userExist.passwordHash;
+    // }
+
+    const user = await User.findByIdAndUpdate(
+        req.params.id,
+        {
+            name: req.body.name,
+            email: req.body.email,
+            passwordHash: newPassword,
+            street: req.body.street,
+            apartment: req.body.apartment,
+            city: req.body.city,
+            zip: req.body.zip,
+            country: req.body.country,
+            phone: req.body.phone,
+            isAdmin: req.body.isAdmin,
+        },
+        { new: true}
+    )  
+
+    if(!user){
+        throw new ApiError(404, "User not updated");
+    }
+
+    return res.status(201).json(
+        new ApiResponse(200, user, "User upted successfully")
+    )
+})
+
+const deleteUser = asyncHandler(async(req, res) => {
+    const { id } = req.params;
+
+    const user = User.findByIdAndDelete(id);
+
+    if(!user){
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(204).json(
+        new ApiResponse(204, user, "User deleted successfully")
+    )
+})
+
+
+
 export {
     registerUser,
     loginUser,
     getUser,
     getUserById,
-    getUserCount
+    getUserCount,
+    updateUser,
+    deleteUser
 }
