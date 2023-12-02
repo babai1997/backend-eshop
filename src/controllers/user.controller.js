@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js"
 import { User} from "../models/user.model.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
+//import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler( async (req, res) => {
@@ -17,10 +17,10 @@ const registerUser = asyncHandler( async (req, res) => {
 
 
     const {name, email, password } = req.body
+    
+    // [name, email, password].some((field) => field.trim() === "")
 
-    if (
-        [name, email, password].some((field) => field.trim() === "")
-    ) {
+    if ( !name || !email || !password) {
         throw new ApiError(400, "All fields are required")
     }
 
@@ -59,6 +59,18 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
 
+    const token = await user.generateAccessToken();
+    createdUser["password"] = undefined;
+    createdUser["accessToken"] = token;
+
+    // res.cookie('jwt', token, {
+    //     expires: new Date(
+    //       Date.now() + 1 * 24 * 60 * 60 * 1000 //******************
+    //     ),
+    //     httpOnly: true,
+    //     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    //   });
+
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User registered Successfully")
     )
@@ -86,13 +98,13 @@ const loginUser = asyncHandler(async (req, res) => {
     user["password"] = undefined;
     user["accessToken"] = token;
 
-    res.cookie('jwt', token, {
-        expires: new Date(
-          Date.now() + 1 * 24 * 60 * 60 * 1000 //******************
-        ),
-        httpOnly: true,
-        secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
-      });
+    // res.cookie('jwt', token, {
+    //     expires: new Date(
+    //       Date.now() + 1 * 24 * 60 * 60 * 1000 //******************
+    //     ),
+    //     httpOnly: true,
+    //     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    //   });
 
     return res.status(201).json(
         new ApiResponse(200, user, "User logged in Successfully")
